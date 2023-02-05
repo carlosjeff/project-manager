@@ -1,13 +1,11 @@
 from tortoise import Tortoise
+from config import Config
 
 class DBConnection:
 
     def __init__(self):
-        self.db_url = "postgres://admin:admin@localhost:5432/backend"
-        self.modules = {'models': ['persistency.models.member',
-                                   'persistency.models.collection',
-                                   'persistency.models.item',
-                                   'persistency.models.credential']}
+        self.db_url = Config.DATABASE_URL
+        self.modules = Config.DATABASE_MODELS
 
     async def __aenter__(self):
         await Tortoise.init(
