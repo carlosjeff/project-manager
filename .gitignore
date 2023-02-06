@@ -129,6 +129,9 @@ dmypy.json
 .pyre/
 
 #pipenv
-Pipfile.lock
+.Pipfile.lock
 
 .idea/
+
+#database
+/postgres-data
