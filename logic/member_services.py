@@ -1,38 +1,68 @@
+import json
+
 from utils.middlewares.session_controller import SessionDB
-from persistency.models.member import Member
+from persistency.models.member import Member, DtoCreateMember, MemberModel
 from datetime import datetime
+from persistency.models.common import StatusOptions
+from utils.exceptions.http_exceptions import BadRequest, NotFound
+from utils.providers.hash_provider import Hash
 
-class MemberServces:
+class MemberServices:
 
-    @classmethod
+    @staticmethod
     @SessionDB
-    async def get_all(cls):
-        member = await Member.filter(status=1).all()
+    async def get_all():
+        member = await Member.filter(
+            status=StatusOptions.Active).all()
         return member
 
-    @classmethod
+    @staticmethod
     @SessionDB
-    async def get_by_id(cls, id: int):
-        member = await Member.get(id=id, status=1)
+    async def get_by_id(member_id: int):
+        try:
+            member = await Member.get(
+                id=member_id,
+                status=StatusOptions.Active)
+            return MemberModel(member).json()
+        except:
+            raise NotFound('the member does not exist')
+
+    @staticmethod
+    @SessionDB
+    async def email_exist(member_email: str):
+        member = await Member.exists(
+            email=member_email)
         return member
 
-    @classmethod
+    @staticmethod
     @SessionDB
-    async def create(cls, member: Member):
+    async def create(member: DtoCreateMember):
+        email_exist = await MemberServices.email_exist(member.email)
+        if email_exist:
+            raise BadRequest(f"Email {member.email} already exists")
+
         member_new = await Member.create(
-            name=member["name"],
-            email=member["email"],
-            password=member["password"],
-            status = 1
+            name=member.name,
+            email=member.email,
+            password=Hash.generate(member.password),
+            status=StatusOptions.Active
         )
-        return member_new
+        return MemberModel(member_new).json()
 
-    @classmethod
+    @staticmethod
     @SessionDB
-    async def update(cls,id ,member):
+    async def update(member_id, member):
         member["updated_at"] = datetime.now()
-        await Member.filter(id=id, status=1).update(**member)
+        await Member.filter(
+            id=member_id,
+            status=StatusOptions.Active).update(**member)
 
-    @classmethod
-    async def delete(cls, id):
-       await cls.update(id, {"status": 2})
+    @staticmethod
+    async def delete (member_id):
+       await MemberServices.update(
+           member_id,
+           {
+               "status": StatusOptions.Disabled,
+               "deleted_at": datetime.now()
+           })
+
