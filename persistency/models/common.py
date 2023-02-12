@@ -1,9 +1,16 @@
 from tortoise import Model, fields
 from enum import Enum
 
+
 class StatusOptions(int, Enum):
     Active = 1
     Disabled = 2
+
+
+class RoleOptions(str, Enum):
+    Default = "default"
+    Admin = "admin"
+
 
 class CommonModel:
     id = fields.IntField(pk=True)

@@ -1,11 +1,11 @@
 import json
 
 from utils.customizations.route_table_custom import RouteTableCustom
-from persistency.models.member import Member, MemberModel, DtoCreateMember
+from persistency.models.member import MemberModel, DtoCreateMember
 from logic.member_services import MemberServices
 from aiohttp import web
 from utils.middlewares.route_controller import Get, Post, Patch, Delete
-from utils.exceptions.http_exceptions import BadRequest
+from utils.middlewares.protect_route import Protect
 
 member_route = RouteTableCustom("/member")
 
@@ -26,6 +26,7 @@ class MemberRoute:
         path='/{member_id}',
         status_code=200
     )
+    @Protect("admin")
     async def get_one(request, member_id: int):
         member = await MemberServices().get_by_id(member_id)
         return web.json_response(member)
@@ -58,5 +59,5 @@ class MemberRoute:
     )
     async def delete(request, id):
         await MemberServices().delete(id)
-        return  web.HTTPNoContent()
+        return web.HTTPNoContent()
 

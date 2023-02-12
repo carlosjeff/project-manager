@@ -1,5 +1,4 @@
-from functools import reduce
-
+from enum import Enum
 from tortoise import fields, Model
 from persistency.models.common import CommonModel
 from utils.validators.member_validator import (
@@ -11,6 +10,7 @@ class Member(CommonModel,Model):
     name = fields.CharField(100)
     email = fields.CharField(100, unique=True)
     password = fields.CharField(255)
+    role = fields.CharField(15)
 
     def __str__(self):
         return f"Member {self.id}: {self.name}"
@@ -81,6 +81,7 @@ class MemberModel:
         self._email = member.email
         self._created_at = member.created_at
         self._status = member.status
+        self._role = member.role
 
     def json(self):
 
@@ -89,5 +90,35 @@ class MemberModel:
             "name": self._name,
             "email": self._email,
             "created_at": str(self._created_at),
-            "status": self._status
+            "status": self._status,
+            "role": self._role
+        }
+
+class LoginModel:
+
+    def __init__(self, login):
+        self._email = login.get('email')
+        self._password = login.get('password')
+
+    @property
+    def email(self):
+        return self._email
+
+    @property
+    def password(self):
+        return self._password
+
+    @email.setter
+    def email(self, value):
+        self._email = value
+
+    @password.setter
+    def password(self, value):
+        self._password = value
+
+    @property
+    def json(self):
+        return {
+            "email": self._email,
+            "password": self._password
         }

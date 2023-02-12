@@ -3,7 +3,7 @@ import json
 from utils.middlewares.session_controller import SessionDB
 from persistency.models.member import Member, DtoCreateMember, MemberModel
 from datetime import datetime
-from persistency.models.common import StatusOptions
+from persistency.models.common import StatusOptions, RoleOptions
 from utils.exceptions.http_exceptions import BadRequest, NotFound
 from utils.providers.hash_provider import Hash
 
@@ -29,6 +29,17 @@ class MemberServices:
 
     @staticmethod
     @SessionDB
+    async def get_by_email(member_email: str):
+        try:
+            member = await Member.get(
+                email=member_email,
+                status=StatusOptions.Active)
+            return member
+        except:
+            raise NotFound('the member does not exist')
+
+    @staticmethod
+    @SessionDB
     async def email_exist(member_email: str):
         member = await Member.exists(
             email=member_email)
@@ -45,7 +56,8 @@ class MemberServices:
             name=member.name,
             email=member.email,
             password=Hash.generate(member.password),
-            status=StatusOptions.Active
+            status=StatusOptions.Active,
+            role= RoleOptions.Default
         )
         return MemberModel(member_new).json()
 
