@@ -28,7 +28,7 @@ class RouteRequest:
     async def select_body(self, request) -> dict:
         try:
             path_params = re.findall(r"\{(.*?)\}", self.path)
-            path_params.append(self.params[0])
+            path_params.extend([self.params[0], 'args', 'kwargs'])
             body_param = {}
             for value in self.params:
                 if not (value in path_params):
