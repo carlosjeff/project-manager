@@ -7,6 +7,8 @@ class Config:
 
     APP_PORT = getenv('APP_PORT', default=8000)
 
+    SECREY_KEY = getenv("SECREY_KEY", default="secret")
+
     DATABASE = getenv('DB', default="postgres")
     DATABASE_USER = getenv('DB_USER', default="admin")
     DATABASE_PASS = getenv('DB_PASS', default="admin")
