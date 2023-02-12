@@ -8,6 +8,8 @@ aiohttp = "*"
 aiodns = "*"
 tortoise-orm = {extras = ["asyncpg"], version = "*"}
 python-dotenv = "*"
+pydantic = "*"
+passlib = {extras = ["bcrypt"], version = "*"}
 
 [dev-packages]
 
