@@ -1,7 +1,6 @@
-import json
-
+from persistency.models.member import Member
 from utils.middlewares.session_controller import SessionDB
-from persistency.models.member import Member, DtoCreateMember, MemberModel
+from persistency.schemas.member_schemas import DtoCreateMember, MemberModel
 from datetime import datetime
 from persistency.models.common import StatusOptions, RoleOptions
 from utils.exceptions.http_exceptions import BadRequest, NotFound
@@ -40,15 +39,8 @@ class MemberServices:
 
     @staticmethod
     @SessionDB
-    async def email_exist(member_email: str):
-        member = await Member.exists(
-            email=member_email)
-        return member
-
-    @staticmethod
-    @SessionDB
     async def create(member: DtoCreateMember):
-        email_exist = await MemberServices.email_exist(member.email)
+        email_exist = await Member.exists(email=member.email)
         if email_exist:
             raise BadRequest(f"Email {member.email} already exists")
 
@@ -57,7 +49,7 @@ class MemberServices:
             email=member.email,
             password=Hash.generate(member.password),
             status=StatusOptions.Active,
-            role= RoleOptions.Default
+            role=RoleOptions.Default
         )
         return MemberModel(member_new).json()
 
@@ -65,12 +57,17 @@ class MemberServices:
     @SessionDB
     async def update(member_id, member):
         member["updated_at"] = datetime.now()
-        await Member.filter(
+        member_update = Member.filter(
             id=member_id,
-            status=StatusOptions.Active).update(**member)
+            status=StatusOptions.Active)
+
+        if not await member_update:
+            raise NotFound('the member does not exist')
+
+        await member_update.update(**member)
 
     @staticmethod
-    async def delete (member_id):
+    async def delete(member_id):
        await MemberServices.update(
            member_id,
            {
