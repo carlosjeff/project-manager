@@ -19,5 +19,9 @@ class Forbidden(BaseHTTPException):
     def __init__(self, message: str, date=None):
         super().__init__(403, message, date)
 
+class InternalServerError(BaseHTTPException):
+    def __init__(self, message: str, date=None):
+        super().__init__(500, message, date)
+
 
 
